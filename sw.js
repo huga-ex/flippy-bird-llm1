@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE = 'flippy-bird-v1';
+const CACHE = 'flippy-bird-v2';
 const ASSETS = [
   './',
   './index.html',
