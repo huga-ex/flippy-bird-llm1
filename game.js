@@ -13,6 +13,7 @@
   const BIRD = 36;
   const BIRD_X = 110;
   const SKY = '#87CEEB';
+  const LETTERBOX = '#000';
   const GROUND_COLOR = '#d8c46a';
   const PIPE = '#5cbf3a';
   const PIPE_EDGE = '#3a8f25';
@@ -227,7 +228,7 @@
   }
 
   function drawWorld() {
-    ctx.fillStyle = SKY;
+    ctx.fillStyle = LETTERBOX;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     const s = Math.min(canvas.width / W, canvas.height / H);
@@ -235,6 +236,8 @@
     const oy = (canvas.height - H * s) / 2;
     ctx.translate(ox, oy);
     ctx.scale(s, s);
+    ctx.fillStyle = SKY;
+    ctx.fillRect(0, 0, W, H);
 
     ctx.font = '30px sans-serif';
     ctx.textAlign = 'center';
@@ -249,16 +252,26 @@
 
     drawGround();
 
-    ctx.save();
-    ctx.translate(BIRD_X, birdY);
-    const ang = Math.max(-0.5, Math.min(1.1, (vy / MAXFALL) * 1.1));
-    ctx.rotate(ang);
-    ctx.scale(-1, 1);
-    ctx.font = BIRD + 'px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(BIRD_EMOJI, 0, 0);
-    ctx.restore();
+    if (state === 'playing') {
+      ctx.font = 'bold 42px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#fff';
+      ctx.fillText(String(score), W / 2, 70);
+    }
+
+    if (state !== 'title') {
+      ctx.save();
+      ctx.translate(BIRD_X, birdY);
+      const ang = Math.max(-0.5, Math.min(1.1, (vy / MAXFALL) * 1.1));
+      ctx.rotate(ang);
+      ctx.scale(-1, 1);
+      ctx.font = BIRD + 'px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(BIRD_EMOJI, 0, 0);
+      ctx.restore();
+    }
 
     ctx.restore();
   }
@@ -357,6 +370,7 @@
     setPipeX: function (i, x) { pipes[i].x = x; },
     setBirdY: function (y) { birdY = y; },
     step: stepFrame,
-    reset: runReset
+    reset: runReset,
+    draw: draw
   };
 })();

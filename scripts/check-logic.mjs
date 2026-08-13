@@ -17,17 +17,25 @@ function fail(msg) {
 
 function makeCtx() {
   const methods = new Set();
+  const calls = [];
+  const state = {};
   const handler = {
     get(t, prop) {
       if (prop in t) return t[prop];
       methods.add(prop);
       return (...args) => {
+        if (prop === 'fillText' || prop === 'fillRect') calls.push({ prop, args, fillStyle: state.fillStyle });
         if (prop.startsWith('create')) return {};
         return undefined;
       };
+    },
+    set(t, prop, value) {
+      state[prop] = value;
+      t[prop] = value;
+      return true;
     }
   };
-  return new Proxy({ measureText: () => ({ width: 0 }) }, handler);
+  return new Proxy({ measureText: () => ({ width: 0 }), calls }, handler);
 }
 
 function makeCanvas() {
@@ -139,6 +147,39 @@ check('mute toggle visible on game over', game.mute.hidden === false, game.mute.
 game.mute.click();
 check('mute toggle flips muted state', f.muted === true, f.muted);
 check('mute toggle persisted to localStorage', (game.v.localStorage.store['flippy-bird.muted']) === '1', game.v.localStorage.store['flippy-bird.muted']);
+
+// rendering regression checks (#4, #5, #6) via draw hook
+const drawCalls3 = (g) => g.canvas.ctx.calls;
+const clearCalls3 = (g) => { g.canvas.ctx.calls.length = 0; };
+
+// #5 letterbox: world frame covers whole canvas with sky; bars are dark
+const game3 = loadGame({});
+const f3 = game3.flippy();
+f3.draw();
+const worldFills = drawCalls3(game3).filter((c) => c.prop === 'fillRect').map((c) => c.fillStyle);
+const skyFills = worldFills.filter((c) => c === '#87CEEB').length;
+const darkFills = worldFills.filter((c) => c === '#000').length;
+check('letterbox bars drawn in black behind the world', darkFills >= 1, darkFills);
+check('world frame filled with sky', skyFills >= 1, skyFills);
+
+// #4 title: only the overlay bird emoji, not the gameplay bird
+clearCalls3(game3);
+f3.draw();
+const titleBird = drawCalls3(game3).filter((c) => c.prop === 'fillText' && c.args[0] === '🐤').length;
+check('title screen draws exactly one bird', titleBird === 1, titleBird);
+
+// #6 score: drawn during play, not during title
+clearCalls3(game3);
+game3.pointerdown();
+f3.draw();
+const playScore = drawCalls3(game3).filter((c) => c.prop === 'fillText' && c.args[0] === String(f3.score)).length;
+check('score drawn during play', playScore >= 1, { playScore, score: f3.score });
+clearCalls3(game3);
+const game4 = loadGame({});
+const f4 = game4.flippy();
+f4.draw();
+const titleScore = drawCalls3(game4).filter((c) => c.prop === 'fillText' && c.args[0] === '0').length;
+check('score not drawn on title', titleScore === 0, titleScore);
 
 // persistence across reload: fresh page shares the same storage
 const storage = game.v.localStorage.store;
