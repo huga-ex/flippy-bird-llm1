@@ -159,8 +159,32 @@ f3.draw();
 const worldFills = drawCalls3(game3).filter((c) => c.prop === 'fillRect').map((c) => c.fillStyle);
 const skyFills = worldFills.filter((c) => c === '#87CEEB').length;
 const darkFills = worldFills.filter((c) => c === '#000').length;
-check('letterbox bars drawn in black behind the world', darkFills >= 1, darkFills);
+check('letterbox bars drawn in black', darkFills >= 1, darkFills);
 check('world frame filled with sky', skyFills >= 1, skyFills);
+
+// #5 extended: fully offscreen objects are culled (optimization)
+const game5 = loadGame({});
+const f5 = game5.flippy();
+game5.pointerdown();
+f5.clearPipes();
+f5.spawnPipe(400 + 500, 300);
+clearCalls3(game5);
+f5.draw();
+const offscreenPipeFills = drawCalls3(game5).filter((c) => c.prop === 'fillRect' && c.fillStyle === '#5cbf3a').length;
+check('fully offscreen pipe is not drawn', offscreenPipeFills === 0, offscreenPipeFills);
+f5.clearPipes();
+f5.spawnPipe(46, 300);
+clearCalls3(game5);
+f5.draw();
+const visiblePipeFills = drawCalls3(game5).filter((c) => c.prop === 'fillRect' && c.fillStyle === '#5cbf3a').length;
+check('visible pipe still drawn', visiblePipeFills >= 1, visiblePipeFills);
+
+// #5 extended: letterbox black is the top-most painted layer
+clearCalls3(game5);
+f5.draw();
+const allFills5 = drawCalls3(game5).filter((c) => c.prop === 'fillRect');
+const lastFill5 = allFills5[allFills5.length - 1];
+check('letterbox black is the top-most layer', !!lastFill5 && lastFill5.fillStyle === '#000', lastFill5);
 
 // #4 title: only the overlay bird emoji, not the gameplay bird
 clearCalls3(game3);

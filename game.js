@@ -236,6 +236,9 @@
     const oy = (canvas.height - H * s) / 2;
     ctx.translate(ox, oy);
     ctx.scale(s, s);
+    ctx.beginPath();
+    ctx.rect(0, 0, W, H);
+    ctx.clip();
     ctx.fillStyle = SKY;
     ctx.fillRect(0, 0, W, H);
 
@@ -243,12 +246,16 @@
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     for (const c of clouds) {
+      if (c.x + c.s < 0 || c.x - c.s > W) continue;
       ctx.globalAlpha = 0.85;
       ctx.fillText('☁️', c.x, c.y);
       ctx.globalAlpha = 1;
     }
 
-    for (const p of pipes) drawPipe(p);
+    for (const p of pipes) {
+      if (p.x + PIPE_W < 0 || p.x > W) continue;
+      drawPipe(p);
+    }
 
     drawGround();
 
@@ -274,6 +281,12 @@
     }
 
     ctx.restore();
+
+    ctx.fillStyle = LETTERBOX;
+    ctx.fillRect(0, 0, ox, canvas.height);
+    ctx.fillRect(ox + W * s, 0, canvas.width - (ox + W * s), canvas.height);
+    ctx.fillRect(ox, 0, W * s, oy);
+    ctx.fillRect(ox, oy + H * s, W * s, canvas.height - (oy + H * s));
   }
 
   function drawPipe(p) {
@@ -293,7 +306,7 @@
     ctx.lineWidth = 3;
     const off = scrollX % 26;
     ctx.beginPath();
-    for (let x = -off; x < W + 26; x += 26) {
+    for (let x = -off; x < W; x += 26) {
       ctx.moveTo(x, H - GROUND_H + 14);
       ctx.lineTo(x + 14, H - GROUND_H + 8);
     }
