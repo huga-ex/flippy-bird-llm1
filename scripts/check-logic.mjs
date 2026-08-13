@@ -229,6 +229,10 @@ const sw = readFileSync(ROOT + '/sw.js', 'utf8');
 const swAsserts = ['./', './index.html', './styles.css', './game.js', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 check('sw.js precaches the full app shell', swAsserts.every((a) => sw.includes("'" + a + "'")), swAsserts);
 
+const swRespondWith = sw.slice(sw.indexOf('event.respondWith'));
+const netFirst = swRespondWith.indexOf('fetch(event.request)') !== -1 && swRespondWith.indexOf('caches.match(event.request)') !== -1 && swRespondWith.indexOf('fetch(event.request)') < swRespondWith.indexOf('caches.match(event.request)');
+check('sw.js fetch handler is network-first with cache fallback', netFirst);
+
 const html = readFileSync(ROOT + '/index.html', 'utf8');
 check('index.html links manifest, registers sw, loads game',
   html.includes('manifest.webmanifest') && html.includes('sw.js') && html.includes('game.js'));
