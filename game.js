@@ -253,6 +253,7 @@
     ctx.translate(BIRD_X, birdY);
     const ang = Math.max(-0.5, Math.min(1.1, (vy / MAXFALL) * 1.1));
     ctx.rotate(ang);
+    ctx.scale(-1, 1);
     ctx.font = BIRD + 'px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -302,7 +303,11 @@
     if (state === 'title') {
       ctx.fillText('flippy-bird', W / 2, H / 2 - 70);
       ctx.font = '56px sans-serif';
-      ctx.fillText(BIRD_EMOJI, W / 2, H / 2 - 6);
+      ctx.save();
+      ctx.translate(W / 2, H / 2 - 6);
+      ctx.scale(-1, 1);
+      ctx.fillText(BIRD_EMOJI, 0, 0);
+      ctx.restore();
       ctx.font = '18px sans-serif';
       ctx.fillStyle = '#e8f4ff';
       ctx.fillText('tap, click, or press space', W / 2, H / 2 + 56);
