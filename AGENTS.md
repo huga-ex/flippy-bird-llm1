@@ -11,3 +11,7 @@ The five canonical triage labels (needs-triage, needs-info, ready-for-agent, rea
 ### Domain docs
 
 Single-context layout: one `CONTEXT.md` at the repo root, ADRs under `docs/adr/`. See `docs/agents/domain.md`.
+
+### Browser automation & rendering
+
+When asked about browser auto-testing, rendering, or headless verification, read `docs/suspicions/lightpanda-no-render.md` first — it records why Lightpanda can't render flippy-bird or Godot web exports, and that safaridriver is the working path.
