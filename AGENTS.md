@@ -1,3 +1,7 @@
+## Image analysis
+
+I can't view images directly, but I can analyze them via `read` (attachments), `sips` (metadata/resize), `tesseract` (OCR), `ffmpeg` (frames/pixels), `file` (format), and raw `python3`; pixel-diff libraries (pixelmatch/sharp) aren't installed.
+
 ## Agent skills
 
 ### Issue tracker
